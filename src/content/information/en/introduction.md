@@ -1,7 +1,13 @@
-**ThoughtLite** is a modern [Astro](https://astro.build/) theme focused on content creation.
+I'm **Gavin Wang** — an IB Diploma candidate based in Shanghai, preparing for the SAT and working through analytic number theory and machine-learning interpretability in my spare time. This site is the long-form version of work I'd otherwise lose track of: experiments, derivations, films, and the occasional finished thing.
 
-The theme focuses on core content-related functions, aiming to build an **efficient and transparent** space for creation.
+Subjects I keep returning to:
 
-Additionally, the theme supports modern features such as **multilingual switching**, **responsive layout**, and **dynamic content filtering**, providing users with a smooth experience.
+- **AI / ML interpretability** — small models, mechanistic probing, and the simple question of what a network has actually learned. I publish reproducible experiments on [GitHub](https://github.com/Gavin-WangSC) and [Hugging Face](https://huggingface.co/).
+- **Mathematics, especially number theory** — currently working through Apostol's *Introduction to Analytic Number Theory* with worked-out notebooks for each chapter.
+- **Theoretical physics** — classical mechanics, special relativity, and a slow self-study path through introductory quantum field theory.
+- **Economics** — IB Economics HL, with a soft spot for monetary policy and the empirical literature.
+- **Film and storyboarding** — I write, board, and edit short films. The storyboards usually outlive the films.
 
-If you are interested in the theme, please visit the [**GitHub repository**](https://github.com/tuyuritio/astro-theme-thought-lite) for more information and quick start guide.
+I work in English, Mandarin, and Japanese (the last one still in progress — I read more comfortably than I write).
+
+If you'd like to get in touch about research, reading, or film, the easiest path is email: [gavin.wangsc@gmail.com](mailto:gavin.wangsc@gmail.com).

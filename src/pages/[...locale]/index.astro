@@ -1,127 +1,452 @@
 ---
-import { render, getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import config, { monolocale } from "$config";
-import Time from "$lib/time";
+import config from "$config";
 import Base from "$layouts/Base.astro";
-import Heatmap from "$components/Heatmap.astro";
 import Logo from "$icons/site-logo.svg";
 import i18nit from "$i18n";
 
 export async function getStaticPaths() {
-	// Create path for each locale, omitting default locale from URL
 	return config.i18n.locales.map(locale => ({ params: { locale: config.i18n.defaultLocale === locale ? undefined : locale } }));
 }
 
 const { locale = config.i18n.defaultLocale } = Astro.params;
-
 const t = i18nit(locale);
 
-// Get preface content for current locale, sorted by timestamp (latest first)
-const prefaces = (
-	await getCollection("preface", preface => {
-		// Handle single locale setup
-		if (monolocale) return true;
+type Project = {
+	title: string;
+	role: string;
+	year: string;
+	summary: string;
+	stack: string[];
+	href?: string;
+	repo?: string;
+	status: "active" | "shipped" | "exploring";
+};
 
-		// Extract language and ID from file path structure
-		const [language, id] = preface.id.split("/");
-		preface.id = id;
+const projects: Project[] = [
+	{
+		title: "Reading the residue: small-model arithmetic in modular space",
+		role: "Independent research",
+		year: "2026",
+		summary:
+			"Probing how compact transformer language models internalize modular arithmetic — fitting linear probes across layers to recover the residue structure they actually use, not the one we assume.",
+		stack: ["PyTorch", "transformer-lens", "Jupyter"],
+		repo: "https://github.com/Gavin-WangSC",
+		status: "active"
+	},
+	{
+		title: "Number-theory notebooks",
+		role: "Solo project",
+		year: "2025–present",
+		summary:
+			"Worked-through derivations across analytic number theory: the prime counting function, Dirichlet characters, and a from-scratch reconstruction of the explicit formula. Each notebook is a single self-contained idea, not a survey.",
+		stack: ["LaTeX", "SageMath", "Python"],
+		repo: "https://github.com/Gavin-WangSC",
+		status: "active"
+	},
+	{
+		title: "ISEF 2025 — Computational Systems",
+		role: "First author",
+		year: "2025",
+		summary:
+			"Regional finalist project on lightweight on-device inference for educational use. Focus on quantization trade-offs and what students can actually run on a school-issued laptop.",
+		stack: ["Python", "ONNX", "Streamlit"],
+		status: "shipped"
+	},
+	{
+		title: "Hugging Face: small-model experiments",
+		role: "Maintainer",
+		year: "2025–present",
+		summary:
+			"Public model cards and reproducible eval scripts for distilled checkpoints I train for personal study. The point is the eval discipline, not the leaderboard.",
+		stack: ["Transformers", "datasets", "evaluate"],
+		href: "https://huggingface.co/",
+		status: "exploring"
+	}
+];
 
-		// Filter by current locale
-		return language === locale;
-	})
-).sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime());
+type Film = {
+	title: string;
+	role: string;
+	year: string;
+	note: string;
+};
 
-// Get published notes for current locale
-const notes = await getCollection("note", note => {
-	// Assign type property
-	Reflect.set(note, "type", "note");
+const films: Film[] = [
+	{
+		title: "Quiet Hours",
+		role: "Writer, director, editor",
+		year: "2025",
+		note: "Eight-minute short. Single location, three actors, hand-drawn storyboard. A study in restraint — what to leave out of frame."
+	},
+	{
+		title: "Storyboard notebooks",
+		role: "Visual development",
+		year: "ongoing",
+		note: "Frame-by-frame storyboards for short pieces and exercises. Pen on paper, then scanned and color-graded for reference."
+	}
+];
 
-	// Filter by publication status and locale
-	let published = !note.data.draft;
-	let localed = monolocale || note.id.split("/")[0] === locale;
+type Focus = {
+	label: string;
+	body: string;
+};
 
-	// Filter published notes by current locale
-	return published && localed;
-});
+const focus: Focus[] = [
+	{
+		label: "Reading",
+		body: "Apostol, *Introduction to Analytic Number Theory*. Peskin & Schroeder, opening chapters. Mankiw for IB Econ HL revision."
+	},
+	{
+		label: "Watching",
+		body: "Recent Anthropic mechanistic-interpretability papers; Andrej Karpathy's nanoGPT walkthroughs; Kurosawa's storyboards."
+	},
+	{
+		label: "Building",
+		body: "A small interpretability dashboard for the modular-arithmetic project. Targeting a writeup before SAT season."
+	},
+	{
+		label: "Studying",
+		body: "SAT (math + reading). IB Economics HL essays. Japanese — moving from textbook into reading short essays."
+	}
+];
 
-// Get published jottings for current locale
-const jottings = await getCollection("jotting", jotting => {
-	// Assign type property
-	Reflect.set(jotting, "type", "jotting");
+const skills = [
+	{
+		group: "AI / ML",
+		items: ["PyTorch", "Transformers", "transformer-lens", "Hugging Face Hub", "ONNX", "model evaluation"]
+	},
+	{
+		group: "Mathematics",
+		items: ["Analytic number theory", "linear algebra", "real analysis (self-study)", "SageMath", "LaTeX"]
+	},
+	{
+		group: "Physics",
+		items: ["Classical mechanics", "special relativity", "intro QFT (self-study)", "Mathematica"]
+	},
+	{
+		group: "Programming",
+		items: ["Python", "TypeScript", "Astro", "Svelte", "Git / GitHub", "shell"]
+	},
+	{
+		group: "Film & video",
+		items: ["DaVinci Resolve", "storyboarding (analog)", "shot listing", "field audio", "color grading"]
+	},
+	{
+		group: "Languages",
+		items: ["English (fluent)", "Mandarin (native)", "Japanese (intermediate)"]
+	}
+];
 
-	// Check monolocale setup or extract language to match locale
-	let localed = monolocale || jotting.id.split("/")[0] === locale;
-
-	// Filter published notes by current locale
-	return !jotting.data.draft && localed;
-});
-
-// Combine contents
-let items: { id: string; type?: string; data: { timestamp: Date; tags?: string[]; [key: string]: any } }[] = [];
-
-// Determine which sections to include
-const sections = config.latest || "*";
-
-// Add contents based on config
-if (sections === "*" || sections.includes("note")) items = items.concat(notes);
-if (sections === "*" || sections.includes("jotting")) items = items.concat(jottings);
-
-// Get the latest content for display
-const latest = items.sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime())[0];
-
-// Get the latest preface for display
-const preface = prefaces[0];
-// Render preface content if available, otherwise use empty object
-const { Content } = preface ? await render(preface) : ({} as any);
+const aboutHref = getRelativeLocaleUrl(locale, "/about");
+const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 ---
 
-<Base title={t("navigation.home")} {locale}>
-	<main class="flex flex-col gap-5 sm:gap-20 grow">
-		<header class="flex items-center justify-center flex-wrap-reverse grow-[0.6]">
-			{config.prologue && <article class="me-auto font-cursive font-thin text-xl sm:text-2xl leading-loose whitespace-pre-line">{config.prologue}</article>}
-			<Logo width={100} />
-		</header>
+<Base title={t("navigation.home")} {locale} description={config.description}>
+	<main class="flex flex-col gap-24 sm:gap-32 grow pb-16">
+		<!-- Hero -->
+		<section class="hero flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-8 pt-8 sm:pt-16">
+			<div class="flex flex-col gap-4 max-w-2xl">
+				<p class="eyebrow font-mono text-xs tracking-[0.2em] uppercase text-secondary">
+					Gavin Wang · Personal site · est. 2026
+				</p>
+				<h1 class="hero-title font-serif text-4xl sm:text-6xl leading-tight">
+					Working between<br />
+					<em class="italic">math, models,</em> and<br />
+					moving images.
+				</h1>
+				<p class="text-lg sm:text-xl text-secondary leading-relaxed max-w-xl">
+					I'm a student-researcher building small, careful experiments in machine learning,
+					reading my way through analytic number theory, and shooting short films on the side.
+					This site collects the work that's worth keeping.
+				</p>
+				<div class="hero-ctas flex flex-wrap gap-x-6 gap-y-2 mt-3 font-mono text-sm">
+					<a href="#research" class="link-arrow">research →</a>
+					<a href="#film" class="link-arrow">film →</a>
+					<a href={aboutHref} class="link-arrow">about →</a>
+					<a href="mailto:gavin.wangsc@gmail.com" class="link-arrow">contact →</a>
+				</div>
+			</div>
+			<div class="logo-wrap shrink-0 self-center sm:self-auto" aria-hidden="true">
+				<Logo width={140} height={140} />
+			</div>
+		</section>
 
-		{
-			preface && (
-				<section class="flex flex-col">
-					<article class="markdown">
-						<Content />
-					</article>
-					<a href={getRelativeLocaleUrl(locale, "/preface")} class="self-end my-2 text-sm text-secondary">
-						—— {Time.toLocaleDateString(preface.data.timestamp, locale)}
-					</a>
-				</section>
-			)
-		}
+		<!-- About -->
+		<section id="about" class="section">
+			<div class="section-head">
+				<span class="section-num font-mono text-xs text-weak">01</span>
+				<h2 class="section-title font-serif text-2xl sm:text-3xl">About</h2>
+			</div>
+			<div class="prose-block grid sm:grid-cols-[2fr_1fr] gap-8 mt-6">
+				<div class="flex flex-col gap-4 text-base sm:text-lg leading-relaxed">
+					<p>
+						I'm an IB Diploma candidate (Economics HL, Math HL) preparing for the SAT and applying
+						to research-leaning undergraduate programs. My time outside school splits roughly evenly
+						between three habits: training small models to understand how they work, working through
+						number-theory problem sets by hand, and writing and shooting short films.
+					</p>
+					<p>
+						The connecting thread is the same kind of attention — a preference for narrow, deep
+						questions over broad surveys, and a habit of writing things up before claiming to
+						understand them. This site is the long-form version of that.
+					</p>
+					<p>
+						You can find me on
+						<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="inline-link">GitHub</a>
+						and
+						<a href="https://huggingface.co/" target="_blank" rel="noopener" class="inline-link">Hugging Face</a>.
+						More on my path is in
+						<a href={aboutHref} class="inline-link">about</a> and
+						<a href={prefaceHref} class="inline-link">preface</a>.
+					</p>
+				</div>
+				<aside class="meta-card font-mono text-sm flex flex-col gap-3">
+					<div class="meta-row"><span class="text-weak">role</span><span>Student-researcher</span></div>
+					<div class="meta-row"><span class="text-weak">based</span><span>Shanghai, CN</span></div>
+					<div class="meta-row"><span class="text-weak">studying</span><span>IB DP · SAT</span></div>
+					<div class="meta-row"><span class="text-weak">focus</span><span>ML · number theory</span></div>
+					<div class="meta-row"><span class="text-weak">also</span><span>Film · storyboarding</span></div>
+				</aside>
+			</div>
+		</section>
 
-		{
-			latest && (
-				<footer class="flex items-center justify-center flex-wrap-reverse gap-10">
-					<Heatmap {locale} {notes} {jottings} />
-
-					<blockquote class="grow flex flex-col">
-						<h4>{t("home.latest")}</h4>
-						<div class="flex flex-col sm:flex-row justify-between gap-1 mt-1">
-							<a href={getRelativeLocaleUrl(locale, `/${latest.type}/${monolocale ? latest.id : latest.id.split("/").slice(1).join("/")}`)} class="link">
-								{latest.data.series && `${latest.data.series} | `}
-								{latest.data.title}
-							</a>
-							<div class="flex gap-1">
-								{latest.data.tags?.map(tag => (
-									<a href={`${getRelativeLocaleUrl(locale, `/${latest.type}`)}?tag=${encodeURIComponent(tag)}`} class="text-secondary text-sm link">
-										#{tag}
-									</a>
-								))}
+		<!-- Research / Projects -->
+		<section id="research" class="section">
+			<div class="section-head">
+				<span class="section-num font-mono text-xs text-weak">02</span>
+				<h2 class="section-title font-serif text-2xl sm:text-3xl">Research &amp; projects</h2>
+			</div>
+			<ul class="project-list flex flex-col mt-4 list-none">
+				{projects.map(p => (
+					<li class="project-row grid sm:grid-cols-[7rem_1fr_auto] gap-2 sm:gap-6 py-6 border-t border-shadow">
+						<div class="font-mono text-xs text-weak pt-1">{p.year}</div>
+						<div class="flex flex-col gap-2">
+							<div class="flex items-baseline gap-3 flex-wrap">
+								<h3 class="font-serif text-lg sm:text-xl leading-snug">{p.title}</h3>
+								<span class={`status-pill status-${p.status} font-mono text-[0.65rem] uppercase tracking-wider`}>{p.status}</span>
 							</div>
+							<p class="text-secondary text-sm font-mono">{p.role}</p>
+							<p class="text-base leading-relaxed">{p.summary}</p>
+							<p class="font-mono text-xs text-weak flex flex-wrap gap-x-2 gap-y-1 mt-1">
+								{p.stack.map(s => (<span>{s}</span>))}
+							</p>
 						</div>
-						<time datetime={latest.data.timestamp.toISOString()} class="text-secondary font-mono text-xs">
-							{Time.toString(latest.data.timestamp)}
-						</time>
-					</blockquote>
-				</footer>
-			)
-		}
+						<div class="flex flex-col gap-1 font-mono text-xs sm:items-end pt-1">
+							{p.repo && <a href={p.repo} target="_blank" rel="noopener" class="link-arrow">repo →</a>}
+							{p.href && <a href={p.href} target="_blank" rel="noopener" class="link-arrow">link →</a>}
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+
+		<!-- Skills -->
+		<section id="skills" class="section">
+			<div class="section-head">
+				<span class="section-num font-mono text-xs text-weak">03</span>
+				<h2 class="section-title font-serif text-2xl sm:text-3xl">Tooling</h2>
+			</div>
+			<dl class="skills-grid grid sm:grid-cols-2 gap-x-10 gap-y-6 mt-4">
+				{skills.map(s => (
+					<div class="skill-group flex flex-col gap-2">
+						<dt class="font-mono text-xs uppercase tracking-[0.18em] text-secondary">{s.group}</dt>
+						<dd class="text-base leading-relaxed">{s.items.join(" · ")}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+
+		<!-- Film -->
+		<section id="film" class="section">
+			<div class="section-head">
+				<span class="section-num font-mono text-xs text-weak">04</span>
+				<h2 class="section-title font-serif text-2xl sm:text-3xl">Film &amp; storyboards</h2>
+			</div>
+			<p class="text-secondary text-base mt-4 max-w-2xl">
+				Film is the other half of how I think — slower than code, more honest about constraint.
+				I write, board, and edit short pieces; the storyboards usually outlive the films.
+			</p>
+			<ul class="film-list flex flex-col mt-4 list-none">
+				{films.map(f => (
+					<li class="film-row grid sm:grid-cols-[7rem_1fr] gap-2 sm:gap-6 py-5 border-t border-shadow">
+						<div class="font-mono text-xs text-weak pt-1">{f.year}</div>
+						<div class="flex flex-col gap-1">
+							<h3 class="font-serif text-lg leading-snug">{f.title}</h3>
+							<p class="text-secondary text-sm font-mono">{f.role}</p>
+							<p class="text-base leading-relaxed mt-1">{f.note}</p>
+						</div>
+					</li>
+				))}
+			</ul>
+		</section>
+
+		<!-- Current focus -->
+		<section id="now" class="section">
+			<div class="section-head">
+				<span class="section-num font-mono text-xs text-weak">05</span>
+				<h2 class="section-title font-serif text-2xl sm:text-3xl">Currently</h2>
+			</div>
+			<dl class="now-grid grid sm:grid-cols-2 gap-x-10 gap-y-6 mt-4">
+				{focus.map(f => (
+					<div class="now-row flex flex-col gap-1">
+						<dt class="font-mono text-xs uppercase tracking-[0.18em] text-secondary">{f.label}</dt>
+						<dd class="text-base leading-relaxed">{f.body}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+
+		<!-- Contact CTA -->
+		<section id="contact" class="section contact-cta flex flex-col items-start gap-6 py-10 border-t border-primary">
+			<p class="font-mono text-xs tracking-[0.2em] uppercase text-weak">06 — Contact</p>
+			<h2 class="font-serif text-3xl sm:text-5xl leading-tight max-w-2xl">
+				If something here resonates, I'd like to hear about it.
+			</h2>
+			<p class="text-secondary text-lg max-w-xl leading-relaxed">
+				Especially: research collaborations, suggested reading, film recommendations, or
+				notes from teachers and students working on similar things.
+			</p>
+			<div class="contact-links flex flex-wrap gap-x-6 gap-y-2 font-mono text-sm">
+				<a href="mailto:gavin.wangsc@gmail.com" class="link-arrow">gavin.wangsc@gmail.com →</a>
+				<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="link-arrow">github/Gavin-WangSC →</a>
+				<a href="https://huggingface.co/" target="_blank" rel="noopener" class="link-arrow">hugging face →</a>
+			</div>
+		</section>
 	</main>
 </Base>
+
+<style>
+	.hero-title {
+		font-family: var(--font-serif), Georgia, serif;
+		letter-spacing: -0.015em;
+	}
+
+	.hero-title em {
+		font-family: var(--font-cursive), var(--font-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+	}
+
+	.eyebrow {
+		font-family: var(--font-mono), monospace;
+	}
+
+	.logo-wrap {
+		color: var(--primary-color);
+		opacity: 0.9;
+	}
+
+	.section-head {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid var(--primary-color);
+	}
+
+	.section-num {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.section-title {
+		letter-spacing: -0.01em;
+	}
+
+	.link-arrow {
+		color: var(--primary-color);
+		text-decoration: underline transparent 0.05em;
+		text-underline-offset: 0.2em;
+		transition: text-decoration-color 0.15s ease-in-out;
+	}
+
+	.link-arrow:hover,
+	.link-arrow:focus-visible {
+		text-decoration-color: currentColor;
+	}
+
+	.inline-link {
+		text-decoration: underline 0.05em var(--secondary-color);
+		text-underline-offset: 0.2em;
+		transition: text-decoration-color 0.15s ease-in-out;
+	}
+
+	.inline-link:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.meta-card {
+		border: 1px solid var(--shadow-color);
+		border-radius: 2px;
+		padding: 1rem 1.1rem;
+		background: var(--block-color);
+		align-self: start;
+	}
+
+	.meta-row {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.border-shadow {
+		border-color: var(--shadow-color);
+	}
+
+	.text-weak {
+		color: var(--weak-color);
+	}
+
+	.project-row,
+	.film-row {
+		transition: background-color 0.15s ease-in-out;
+	}
+
+	.project-row:hover,
+	.film-row:hover {
+		background-color: color-mix(in srgb, var(--block-color) 60%, transparent);
+	}
+
+	.status-pill {
+		padding: 0.15rem 0.5rem;
+		border-radius: 2px;
+		border: 1px solid currentColor;
+		line-height: 1.2;
+	}
+
+	.status-active {
+		color: var(--primary-color);
+	}
+
+	.status-shipped {
+		color: var(--secondary-color);
+	}
+
+	.status-exploring {
+		color: var(--weak-color);
+	}
+
+	.contact-cta {
+		margin-top: 2rem;
+	}
+
+	@media (max-width: 640px) {
+		.section-head {
+			flex-wrap: wrap;
+		}
+		.hero-title {
+			font-size: 2.25rem;
+		}
+	}
+
+	/* Respect reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.project-row,
+		.film-row,
+		.link-arrow,
+		.inline-link {
+			transition: none;
+		}
+	}
+</style>

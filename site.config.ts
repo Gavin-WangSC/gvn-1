@@ -1,19 +1,19 @@
 import siteConfig from "./src/lib/config";
 
 const config = siteConfig({
-	title: "ThoughtLite",
-	prologue: "If you need a website\nthat loads fast and has great SEO, then Astro is for you.",
+	title: "Gavin Wang",
+	prologue: "Student · Researcher · Builder.\nNotes from the edge of\nmath, code, and moving images.",
 	author: {
-		name: "Your Name",
-		email: "hi@your.mail",
-		link: "https://your.website"
+		name: "Gavin Wang",
+		email: "gavin.wangsc@gmail.com",
+		link: "https://Gavin-WangSC.github.io/gvn-1"
 	},
-	description: "A modern Astro theme focused on content creation.",
+	description: "Personal site of Gavin Wang — work and notes on AI/ML, number theory, theoretical physics, economics, and film.",
 	copyright: {
-		type: "CC BY-NC-ND 4.0",
-		year: "2025"
+		type: "CC BY-NC 4.0",
+		year: "2026"
 	},
-	timezone: "UTC",
+	timezone: "Asia/Shanghai",
 	i18n: {
 		locales: ["en", "zh-cn", "ja"],
 		defaultLocale: "en"
@@ -23,8 +23,7 @@ const config = siteConfig({
 		jotting: 24
 	},
 	heatmap: {
-		unit: "day",
-		weeks: 20
+		unit: "week"
 	},
 	feed: {
 		section: "*",
