@@ -1,13 +1,15 @@
-I'm **Gavin Wang** — an IB Diploma candidate based in Shanghai, preparing for the SAT and working through analytic number theory and machine-learning interpretability in my spare time. This site is the long-form version of work I'd otherwise lose track of: experiments, derivations, films, and the occasional finished thing.
+I'm **Gavin Wang**, a student interested in technology and social problems.
 
-Subjects I keep returning to:
+A lot of my work starts from STEM: code, AI, math, physics, and research. But the important question for me is what these tools change for people. I care about access, education, communication, and practical usefulness.
 
-- **AI / ML interpretability** — small models, mechanistic probing, and the simple question of what a network has actually learned. I publish reproducible experiments on [GitHub](https://github.com/Gavin-WangSC) and [Hugging Face](https://huggingface.co/).
-- **Mathematics, especially number theory** — currently working through Apostol's *Introduction to Analytic Number Theory* with worked-out notebooks for each chapter.
-- **Theoretical physics** — classical mechanics, special relativity, and a slow self-study path through introductory quantum field theory.
-- **Economics** — IB Economics HL, with a soft spot for monetary policy and the empirical literature.
-- **Film and storyboarding** — I write, board, and edit short films. The storyboards usually outlive the films.
+Things I keep returning to:
 
-I work in English, Mandarin, and Japanese (the last one still in progress — I read more comfortably than I write).
+- **Technology and access** — how tools can become more useful and available.
+- **Learning and communication** — school, language, education, and how people explain ideas.
+- **Code and experiments** — small projects, tests, and prototypes.
+- **Film and visual work** — video, storyboards, edits, and image-based notes.
+- **Languages** — Mandarin, English, and Japanese.
 
-If you'd like to get in touch about research, reading, or film, the easiest path is email: [gavin.wangsc@gmail.com](mailto:gavin.wangsc@gmail.com).
+This site collects projects, notes, writing, and visual work as they develop.
+
+Email: [wangsc1124@gmail.com](mailto:wangsc1124@gmail.com).

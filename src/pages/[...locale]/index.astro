@@ -25,42 +25,36 @@ type Project = {
 
 const projects: Project[] = [
 	{
-		title: "Reading the residue: small-model arithmetic in modular space",
-		role: "Independent research",
-		year: "2026",
-		summary:
-			"Probing how compact transformer language models internalize modular arithmetic — fitting linear probes across layers to recover the residue structure they actually use, not the one we assume.",
-		stack: ["PyTorch", "transformer-lens", "Jupyter"],
-		repo: "https://github.com/Gavin-WangSC",
+		title: "Technology and access",
+		role: "Notes and projects",
+		year: "ongoing",
+		summary: "Work around how tools can become more useful and available, especially in education and daily life.",
+		stack: ["access", "education", "tools"],
 		status: "active"
 	},
 	{
-		title: "Number-theory notebooks",
-		role: "Solo project",
-		year: "2025–present",
-		summary:
-			"Worked-through derivations across analytic number theory: the prime counting function, Dirichlet characters, and a from-scratch reconstruction of the explicit formula. Each notebook is a single self-contained idea, not a survey.",
-		stack: ["LaTeX", "SageMath", "Python"],
-		repo: "https://github.com/Gavin-WangSC",
+		title: "Learning and communication",
+		role: "Writing",
+		year: "ongoing",
+		summary: "Notes on school, language, education, and how people explain ideas to each other.",
+		stack: ["language", "school", "writing"],
 		status: "active"
 	},
 	{
-		title: "ISEF 2025 — Computational Systems",
-		role: "First author",
-		year: "2025",
-		summary:
-			"Regional finalist project on lightweight on-device inference for educational use. Focus on quantization trade-offs and what students can actually run on a school-issued laptop.",
-		stack: ["Python", "ONNX", "Streamlit"],
-		status: "shipped"
+		title: "Code and experiments",
+		role: "Small technical work",
+		year: "ongoing",
+		summary: "Small projects, tests, and prototypes. The technical part matters most when it connects back to a real problem.",
+		stack: ["code", "AI", "prototypes"],
+		repo: "https://github.com/Gavin-WangSC",
+		status: "exploring"
 	},
 	{
-		title: "Hugging Face: small-model experiments",
-		role: "Maintainer",
-		year: "2025–present",
-		summary:
-			"Public model cards and reproducible eval scripts for distilled checkpoints I train for personal study. The point is the eval discipline, not the leaderboard.",
-		stack: ["Transformers", "datasets", "evaluate"],
-		href: "https://huggingface.co/",
+		title: "Film and visual work",
+		role: "Images and video",
+		year: "ongoing",
+		summary: "Video, storyboards, edits, references, and image-based notes.",
+		stack: ["film", "editing", "storyboards"],
 		status: "exploring"
 	}
 ];
@@ -74,16 +68,16 @@ type Film = {
 
 const films: Film[] = [
 	{
-		title: "Quiet Hours",
-		role: "Writer, director, editor",
-		year: "2025",
-		note: "Eight-minute short. Single location, three actors, hand-drawn storyboard. A study in restraint — what to leave out of frame."
+		title: "Video and editing",
+		role: "Visual work",
+		year: "ongoing",
+		note: "Short videos, edits, and visual exercises. I care about how a scene is shaped, not just what it shows."
 	},
 	{
-		title: "Storyboard notebooks",
-		role: "Visual development",
+		title: "Frames and references",
+		role: "Image notes",
 		year: "ongoing",
-		note: "Frame-by-frame storyboards for short pieces and exercises. Pen on paper, then scanned and color-graded for reference."
+		note: "Stills, screenshots, sketches, and references for future work."
 	}
 ];
 
@@ -95,51 +89,50 @@ type Focus = {
 const focus: Focus[] = [
 	{
 		label: "Reading",
-		body: "Apostol, *Introduction to Analytic Number Theory*. Peskin & Schroeder, opening chapters. Mankiw for IB Econ HL revision."
-	},
-	{
-		label: "Watching",
-		body: "Recent Anthropic mechanistic-interpretability papers; Andrej Karpathy's nanoGPT walkthroughs; Kurosawa's storyboards."
+		body: "Books, essays, and notes from school and outside school."
 	},
 	{
 		label: "Building",
-		body: "A small interpretability dashboard for the modular-arithmetic project. Targeting a writeup before SAT season."
+		body: "This site and a few small projects."
 	},
 	{
 		label: "Studying",
-		body: "SAT (math + reading). IB Economics HL essays. Japanese — moving from textbook into reading short essays."
+		body: "School, languages, and college application work."
+	},
+	{
+		label: "Thinking about",
+		body: "How technical skills can be useful beyond technical circles."
 	}
 ];
 
 const skills = [
 	{
-		group: "AI / ML",
-		items: ["PyTorch", "Transformers", "transformer-lens", "Hugging Face Hub", "ONNX", "model evaluation"]
+		group: "Technology",
+		items: ["code", "AI", "small tools", "prototypes", "GitHub"]
 	},
 	{
-		group: "Mathematics",
-		items: ["Analytic number theory", "linear algebra", "real analysis (self-study)", "SageMath", "LaTeX"]
+		group: "Social questions",
+		items: ["education", "access", "communication", "practical usefulness"]
 	},
 	{
-		group: "Physics",
-		items: ["Classical mechanics", "special relativity", "intro QFT (self-study)", "Mathematica"]
+		group: "Learning",
+		items: ["school", "languages", "writing", "research habits"]
 	},
 	{
-		group: "Programming",
-		items: ["Python", "TypeScript", "Astro", "Svelte", "Git / GitHub", "shell"]
+		group: "STEM",
+		items: ["math", "physics", "computer science", "economics"]
 	},
 	{
-		group: "Film & video",
-		items: ["DaVinci Resolve", "storyboarding (analog)", "shot listing", "field audio", "color grading"]
+		group: "Film and images",
+		items: ["video editing", "storyboards", "visual notes", "composition"]
 	},
 	{
 		group: "Languages",
-		items: ["English (fluent)", "Mandarin (native)", "Japanese (intermediate)"]
+		items: ["Mandarin", "English", "Japanese"]
 	}
 ];
 
 const aboutHref = getRelativeLocaleUrl(locale, "/about");
-const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 ---
 
 <Base title={t("navigation.home")} {locale} description={config.description}>
@@ -147,25 +140,25 @@ const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 		<!-- Hero -->
 		<section class="hero flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-8 pt-8 sm:pt-16">
 			<div class="flex flex-col gap-4 max-w-2xl">
-				<p class="eyebrow font-mono text-xs tracking-[0.2em] uppercase text-secondary">
-					Gavin Wang · Personal site · est. 2026
-				</p>
-				<h1 class="hero-title font-serif text-4xl sm:text-6xl leading-tight">
-					Working between<br />
-					<em class="italic">math, models,</em> and<br />
-					moving images.
-				</h1>
-				<p class="text-lg sm:text-xl text-secondary leading-relaxed max-w-xl">
-					I'm a student-researcher building small, careful experiments in machine learning,
-					reading my way through analytic number theory, and shooting short films on the side.
-					This site collects the work that's worth keeping.
-				</p>
-				<div class="hero-ctas flex flex-wrap gap-x-6 gap-y-2 mt-3 font-mono text-sm">
-					<a href="#research" class="link-arrow">research →</a>
-					<a href="#film" class="link-arrow">film →</a>
-					<a href={aboutHref} class="link-arrow">about →</a>
-					<a href="mailto:gavin.wangsc@gmail.com" class="link-arrow">contact →</a>
-				</div>
+					<p class="eyebrow font-mono text-xs tracking-[0.2em] uppercase text-secondary">
+						Gavin Wang · Personal site · est. 2026
+					</p>
+					<h1 class="hero-title font-serif text-4xl sm:text-6xl leading-tight">
+						Projects and notes<br />
+						on <em class="italic">technology, people,</em><br />
+						and learning.
+					</h1>
+					<p class="text-lg sm:text-xl text-secondary leading-relaxed max-w-xl">
+						Hi, I'm Gavin Wang. I'm a student interested in how technology can respond to
+						real problems: education, access, communication, and the way people use tools in
+						daily life.
+					</p>
+					<div class="hero-ctas flex flex-wrap gap-x-6 gap-y-2 mt-3 font-mono text-sm">
+						<a href="#projects" class="link-arrow">projects →</a>
+						<a href="#visual" class="link-arrow">visual →</a>
+						<a href={aboutHref} class="link-arrow">about →</a>
+						<a href="mailto:wangsc1124@gmail.com" class="link-arrow">contact →</a>
+					</div>
 			</div>
 			<div class="logo-wrap shrink-0 self-center sm:self-auto" aria-hidden="true">
 				<Logo width={140} height={140} />
@@ -180,42 +173,38 @@ const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 			</div>
 			<div class="prose-block grid sm:grid-cols-[2fr_1fr] gap-8 mt-6">
 				<div class="flex flex-col gap-4 text-base sm:text-lg leading-relaxed">
-					<p>
-						I'm an IB Diploma candidate (Economics HL, Math HL) preparing for the SAT and applying
-						to research-leaning undergraduate programs. My time outside school splits roughly evenly
-						between three habits: training small models to understand how they work, working through
-						number-theory problem sets by hand, and writing and shooting short films.
-					</p>
-					<p>
-						The connecting thread is the same kind of attention — a preference for narrow, deep
-						questions over broad surveys, and a habit of writing things up before claiming to
-						understand them. This site is the long-form version of that.
-					</p>
-					<p>
-						You can find me on
-						<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="inline-link">GitHub</a>
-						and
-						<a href="https://huggingface.co/" target="_blank" rel="noopener" class="inline-link">Hugging Face</a>.
-						More on my path is in
-						<a href={aboutHref} class="inline-link">about</a> and
-						<a href={prefaceHref} class="inline-link">preface</a>.
-					</p>
-				</div>
-				<aside class="meta-card font-mono text-sm flex flex-col gap-3">
-					<div class="meta-row"><span class="text-weak">role</span><span>Student-researcher</span></div>
-					<div class="meta-row"><span class="text-weak">based</span><span>Shanghai, CN</span></div>
-					<div class="meta-row"><span class="text-weak">studying</span><span>IB DP · SAT</span></div>
-					<div class="meta-row"><span class="text-weak">focus</span><span>ML · number theory</span></div>
-					<div class="meta-row"><span class="text-weak">also</span><span>Film · storyboarding</span></div>
-				</aside>
+						<p>
+							I'm Gavin Wang, a student interested in technology and social problems.
+						</p>
+						<p>
+							My work often starts from STEM, but the important question for me is what these
+							tools change for people. I care about access, education, communication, and
+							practical usefulness.
+						</p>
+						<p>
+							I also work with code, AI, math, film, and languages. This site collects projects,
+							notes, writing, and visual work as they develop.
+							You can find me on
+							<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="inline-link">GitHub</a>
+							or email me at
+							<a href="mailto:wangsc1124@gmail.com" class="inline-link">wangsc1124@gmail.com</a>.
+						</p>
+					</div>
+					<aside class="meta-card font-mono text-sm flex flex-col gap-3">
+						<div class="meta-row"><span class="text-weak">role</span><span>Student</span></div>
+						<div class="meta-row"><span class="text-weak">based</span><span>Phoenix, AZ</span></div>
+						<div class="meta-row"><span class="text-weak">studying</span><span>IB · SAT</span></div>
+						<div class="meta-row"><span class="text-weak">focus</span><span>People · tools</span></div>
+						<div class="meta-row"><span class="text-weak">also</span><span>Film · languages</span></div>
+					</aside>
 			</div>
 		</section>
 
-		<!-- Research / Projects -->
-		<section id="research" class="section">
-			<div class="section-head">
-				<span class="section-num font-mono text-xs text-weak">02</span>
-				<h2 class="section-title font-serif text-2xl sm:text-3xl">Research &amp; projects</h2>
+			<!-- Projects / Notes -->
+			<section id="projects" class="section">
+				<div class="section-head">
+					<span class="section-num font-mono text-xs text-weak">02</span>
+					<h2 class="section-title font-serif text-2xl sm:text-3xl">Projects &amp; notes</h2>
 			</div>
 			<ul class="project-list flex flex-col mt-4 list-none">
 				{projects.map(p => (
@@ -257,16 +246,16 @@ const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 			</dl>
 		</section>
 
-		<!-- Film -->
-		<section id="film" class="section">
-			<div class="section-head">
-				<span class="section-num font-mono text-xs text-weak">04</span>
-				<h2 class="section-title font-serif text-2xl sm:text-3xl">Film &amp; storyboards</h2>
-			</div>
-			<p class="text-secondary text-base mt-4 max-w-2xl">
-				Film is the other half of how I think — slower than code, more honest about constraint.
-				I write, board, and edit short pieces; the storyboards usually outlive the films.
-			</p>
+			<!-- Visual work -->
+			<section id="visual" class="section">
+				<div class="section-head">
+					<span class="section-num font-mono text-xs text-weak">04</span>
+					<h2 class="section-title font-serif text-2xl sm:text-3xl">Film &amp; visual work</h2>
+				</div>
+				<p class="text-secondary text-base mt-4 max-w-2xl">
+					Video and images are part of how I organize ideas. This section is for visual work
+					without making it look more finished than it is.
+				</p>
 			<ul class="film-list flex flex-col mt-4 list-none">
 				{films.map(f => (
 					<li class="film-row grid sm:grid-cols-[7rem_1fr] gap-2 sm:gap-6 py-5 border-t border-shadow">
@@ -299,19 +288,17 @@ const prefaceHref = getRelativeLocaleUrl(locale, "/preface");
 
 		<!-- Contact CTA -->
 		<section id="contact" class="section contact-cta flex flex-col items-start gap-6 py-10 border-t border-primary">
-			<p class="font-mono text-xs tracking-[0.2em] uppercase text-weak">06 — Contact</p>
-			<h2 class="font-serif text-3xl sm:text-5xl leading-tight max-w-2xl">
-				If something here resonates, I'd like to hear about it.
-			</h2>
-			<p class="text-secondary text-lg max-w-xl leading-relaxed">
-				Especially: research collaborations, suggested reading, film recommendations, or
-				notes from teachers and students working on similar things.
-			</p>
-			<div class="contact-links flex flex-wrap gap-x-6 gap-y-2 font-mono text-sm">
-				<a href="mailto:gavin.wangsc@gmail.com" class="link-arrow">gavin.wangsc@gmail.com →</a>
-				<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="link-arrow">github/Gavin-WangSC →</a>
-				<a href="https://huggingface.co/" target="_blank" rel="noopener" class="link-arrow">hugging face →</a>
-			</div>
+				<p class="font-mono text-xs tracking-[0.2em] uppercase text-weak">06 — Contact</p>
+				<h2 class="font-serif text-3xl sm:text-5xl leading-tight max-w-2xl">
+					Contact
+				</h2>
+				<p class="text-secondary text-lg max-w-xl leading-relaxed">
+					Email is the best way to reach me.
+				</p>
+				<div class="contact-links flex flex-wrap gap-x-6 gap-y-2 font-mono text-sm">
+					<a href="mailto:wangsc1124@gmail.com" class="link-arrow">wangsc1124@gmail.com →</a>
+					<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="link-arrow">github/Gavin-WangSC →</a>
+				</div>
 		</section>
 	</main>
 </Base>

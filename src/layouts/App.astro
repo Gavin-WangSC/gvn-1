@@ -64,7 +64,10 @@ const route = Astro.url.pathname.slice(`/${locale === config.i18n.defaultLocale 
 
 		<style set:html={`[lang="${locale}"]{--font-serif:var(${localedMainFont})}`}></style>
 
-		{config.i18n.locales.map(locale => <link rel="alternate" hreflang={locale} href={getAbsoluteLocaleUrl(locale, route)} />)}
+			{
+				config.i18n.locales.length > 1 &&
+					config.i18n.locales.map(locale => <link rel="alternate" hreflang={locale} href={getAbsoluteLocaleUrl(locale, route)} />)
+			}
 
 		<script is:inline>
 			var theme = localStorage.getItem("theme");
