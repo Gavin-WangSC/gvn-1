@@ -1,439 +1,127 @@
 ---
+import { render, getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import config from "$config";
+import config, { monolocale } from "$config";
+import Time from "$lib/time";
 import Base from "$layouts/Base.astro";
+import Heatmap from "$components/Heatmap.astro";
 import Logo from "$icons/site-logo.svg";
 import i18nit from "$i18n";
 
 export async function getStaticPaths() {
+	// Create path for each locale, omitting default locale from URL
 	return config.i18n.locales.map(locale => ({ params: { locale: config.i18n.defaultLocale === locale ? undefined : locale } }));
 }
 
 const { locale = config.i18n.defaultLocale } = Astro.params;
+
 const t = i18nit(locale);
 
-type Project = {
-	title: string;
-	role: string;
-	year: string;
-	summary: string;
-	stack: string[];
-	href?: string;
-	repo?: string;
-	status: "active" | "shipped" | "exploring";
-};
+// Get preface content for current locale, sorted by timestamp (latest first)
+const prefaces = (
+	await getCollection("preface", preface => {
+		// Handle single locale setup
+		if (monolocale) return true;
 
-const projects: Project[] = [
-	{
-		title: "Technology and access",
-		role: "Notes and projects",
-		year: "ongoing",
-		summary: "Work around how tools can become more useful and available, especially in education and daily life.",
-		stack: ["access", "education", "tools"],
-		status: "active"
-	},
-	{
-		title: "Learning and communication",
-		role: "Writing",
-		year: "ongoing",
-		summary: "Notes on school, language, education, and how people explain ideas to each other.",
-		stack: ["language", "school", "writing"],
-		status: "active"
-	},
-	{
-		title: "Code and experiments",
-		role: "Small technical work",
-		year: "ongoing",
-		summary: "Small projects, tests, and prototypes. The technical part matters most when it connects back to a real problem.",
-		stack: ["code", "AI", "prototypes"],
-		repo: "https://github.com/Gavin-WangSC",
-		status: "exploring"
-	},
-	{
-		title: "Film and visual work",
-		role: "Images and video",
-		year: "ongoing",
-		summary: "Video, storyboards, edits, references, and image-based notes.",
-		stack: ["film", "editing", "storyboards"],
-		status: "exploring"
-	}
-];
+		// Extract language and ID from file path structure
+		const [language, id] = preface.id.split("/");
+		preface.id = id;
 
-type Film = {
-	title: string;
-	role: string;
-	year: string;
-	note: string;
-};
+		// Filter by current locale
+		return language === locale;
+	})
+).sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime());
 
-const films: Film[] = [
-	{
-		title: "Video and editing",
-		role: "Visual work",
-		year: "ongoing",
-		note: "Short videos, edits, and visual exercises. I care about how a scene is shaped, not just what it shows."
-	},
-	{
-		title: "Frames and references",
-		role: "Image notes",
-		year: "ongoing",
-		note: "Stills, screenshots, sketches, and references for future work."
-	}
-];
+// Get published notes for current locale
+const notes = await getCollection("note", note => {
+	// Assign type property
+	Reflect.set(note, "type", "note");
 
-type Focus = {
-	label: string;
-	body: string;
-};
+	// Filter by publication status and locale
+	let published = !note.data.draft;
+	let localed = monolocale || note.id.split("/")[0] === locale;
 
-const focus: Focus[] = [
-	{
-		label: "Reading",
-		body: "Books, essays, and notes from school and outside school."
-	},
-	{
-		label: "Building",
-		body: "This site and a few small projects."
-	},
-	{
-		label: "Studying",
-		body: "School, languages, and college application work."
-	},
-	{
-		label: "Thinking about",
-		body: "How technical skills can be useful beyond technical circles."
-	}
-];
+	// Filter published notes by current locale
+	return published && localed;
+});
 
-const skills = [
-	{
-		group: "Technology",
-		items: ["code", "AI", "small tools", "prototypes", "GitHub"]
-	},
-	{
-		group: "Social questions",
-		items: ["education", "access", "communication", "practical usefulness"]
-	},
-	{
-		group: "Learning",
-		items: ["school", "languages", "writing", "research habits"]
-	},
-	{
-		group: "STEM",
-		items: ["math", "physics", "computer science", "economics"]
-	},
-	{
-		group: "Film and images",
-		items: ["video editing", "storyboards", "visual notes", "composition"]
-	},
-	{
-		group: "Languages",
-		items: ["Mandarin", "English", "Japanese"]
-	}
-];
+// Get published jottings for current locale
+const jottings = await getCollection("jotting", jotting => {
+	// Assign type property
+	Reflect.set(jotting, "type", "jotting");
 
-const aboutHref = getRelativeLocaleUrl(locale, "/about");
+	// Check monolocale setup or extract language to match locale
+	let localed = monolocale || jotting.id.split("/")[0] === locale;
+
+	// Filter published notes by current locale
+	return !jotting.data.draft && localed;
+});
+
+// Combine contents
+let items: { id: string; type?: string; data: { timestamp: Date; tags?: string[]; [key: string]: any } }[] = [];
+
+// Determine which sections to include
+const sections = config.latest || "*";
+
+// Add contents based on config
+if (sections === "*" || sections.includes("note")) items = items.concat(notes);
+if (sections === "*" || sections.includes("jotting")) items = items.concat(jottings);
+
+// Get the latest content for display
+const latest = items.sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime())[0];
+
+// Get the latest preface for display
+const preface = prefaces[0];
+// Render preface content if available, otherwise use empty object
+const { Content } = preface ? await render(preface) : ({} as any);
 ---
 
-<Base title={t("navigation.home")} {locale} description={config.description}>
-	<main class="flex flex-col gap-24 sm:gap-32 grow pb-16">
-		<!-- Hero -->
-		<section class="hero flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-8 pt-8 sm:pt-16">
-			<div class="flex flex-col gap-4 max-w-2xl">
-					<p class="eyebrow font-mono text-xs tracking-[0.2em] uppercase text-secondary">
-						Gavin Wang · Personal site · est. 2026
-					</p>
-					<h1 class="hero-title font-serif text-4xl sm:text-6xl leading-tight">
-						Projects and notes<br />
-						on <em class="italic">technology, people,</em><br />
-						and learning.
-					</h1>
-					<p class="text-lg sm:text-xl text-secondary leading-relaxed max-w-xl">
-						Hi, I'm Gavin Wang. I'm a student interested in how technology can respond to
-						real problems: education, access, communication, and the way people use tools in
-						daily life.
-					</p>
-					<div class="hero-ctas flex flex-wrap gap-x-6 gap-y-2 mt-3 font-mono text-sm">
-						<a href="#projects" class="link-arrow">projects →</a>
-						<a href="#visual" class="link-arrow">visual →</a>
-						<a href={aboutHref} class="link-arrow">about →</a>
-						<a href="mailto:wangsc1124@gmail.com" class="link-arrow">contact →</a>
-					</div>
-			</div>
-			<div class="logo-wrap shrink-0 self-center sm:self-auto" aria-hidden="true">
-				<Logo width={140} height={140} />
-			</div>
-		</section>
+<Base title={t("navigation.home")} {locale}>
+	<main class="flex flex-col gap-5 sm:gap-20 grow">
+		<header class="flex items-center justify-center flex-wrap-reverse grow-[0.6]">
+			{config.prologue && <article class="me-auto font-cursive font-thin text-xl sm:text-2xl leading-loose whitespace-pre-line">{config.prologue}</article>}
+			<Logo width={100} />
+		</header>
 
-		<!-- About -->
-		<section id="about" class="section">
-			<div class="section-head">
-				<span class="section-num font-mono text-xs text-weak">01</span>
-				<h2 class="section-title font-serif text-2xl sm:text-3xl">About</h2>
-			</div>
-			<div class="prose-block grid sm:grid-cols-[2fr_1fr] gap-8 mt-6">
-				<div class="flex flex-col gap-4 text-base sm:text-lg leading-relaxed">
-						<p>
-							I'm Gavin Wang, a student interested in technology and social problems.
-						</p>
-						<p>
-							My work often starts from STEM, but the important question for me is what these
-							tools change for people. I care about access, education, communication, and
-							practical usefulness.
-						</p>
-						<p>
-							I also work with code, AI, math, film, and languages. This site collects projects,
-							notes, writing, and visual work as they develop.
-							You can find me on
-							<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="inline-link">GitHub</a>
-							or email me at
-							<a href="mailto:wangsc1124@gmail.com" class="inline-link">wangsc1124@gmail.com</a>.
-						</p>
-					</div>
-					<aside class="meta-card font-mono text-sm flex flex-col gap-3">
-						<div class="meta-row"><span class="text-weak">role</span><span>Student</span></div>
-						<div class="meta-row"><span class="text-weak">based</span><span>Phoenix, AZ</span></div>
-						<div class="meta-row"><span class="text-weak">studying</span><span>IB · SAT</span></div>
-						<div class="meta-row"><span class="text-weak">focus</span><span>People · tools</span></div>
-						<div class="meta-row"><span class="text-weak">also</span><span>Film · languages</span></div>
-					</aside>
-			</div>
-		</section>
+		{
+			preface && (
+				<section class="flex flex-col">
+					<article class="markdown">
+						<Content />
+					</article>
+					<a href={getRelativeLocaleUrl(locale, "/preface")} class="self-end my-2 text-sm text-secondary">
+						—— {Time.toLocaleDateString(preface.data.timestamp, locale)}
+					</a>
+				</section>
+			)
+		}
 
-			<!-- Projects / Notes -->
-			<section id="projects" class="section">
-				<div class="section-head">
-					<span class="section-num font-mono text-xs text-weak">02</span>
-					<h2 class="section-title font-serif text-2xl sm:text-3xl">Projects &amp; notes</h2>
-			</div>
-			<ul class="project-list flex flex-col mt-4 list-none">
-				{projects.map(p => (
-					<li class="project-row grid sm:grid-cols-[7rem_1fr_auto] gap-2 sm:gap-6 py-6 border-t border-shadow">
-						<div class="font-mono text-xs text-weak pt-1">{p.year}</div>
-						<div class="flex flex-col gap-2">
-							<div class="flex items-baseline gap-3 flex-wrap">
-								<h3 class="font-serif text-lg sm:text-xl leading-snug">{p.title}</h3>
-								<span class={`status-pill status-${p.status} font-mono text-[0.65rem] uppercase tracking-wider`}>{p.status}</span>
+		{
+			latest && (
+				<footer class="flex items-center justify-center flex-wrap-reverse gap-10">
+					<Heatmap {locale} {notes} {jottings} />
+
+					<blockquote class="grow flex flex-col">
+						<h4>{t("home.latest")}</h4>
+						<div class="flex flex-col sm:flex-row justify-between gap-1 mt-1">
+							<a href={getRelativeLocaleUrl(locale, `/${latest.type}/${monolocale ? latest.id : latest.id.split("/").slice(1).join("/")}`)} class="link">
+								{latest.data.series && `${latest.data.series} | `}
+								{latest.data.title}
+							</a>
+							<div class="flex gap-1">
+								{latest.data.tags?.map(tag => (
+									<a href={`${getRelativeLocaleUrl(locale, `/${latest.type}`)}?tag=${encodeURIComponent(tag)}`} class="text-secondary text-sm link">
+										#{tag}
+									</a>
+								))}
 							</div>
-							<p class="text-secondary text-sm font-mono">{p.role}</p>
-							<p class="text-base leading-relaxed">{p.summary}</p>
-							<p class="font-mono text-xs text-weak flex flex-wrap gap-x-2 gap-y-1 mt-1">
-								{p.stack.map(s => (<span>{s}</span>))}
-							</p>
 						</div>
-						<div class="flex flex-col gap-1 font-mono text-xs sm:items-end pt-1">
-							{p.repo && <a href={p.repo} target="_blank" rel="noopener" class="link-arrow">repo →</a>}
-							{p.href && <a href={p.href} target="_blank" rel="noopener" class="link-arrow">link →</a>}
-						</div>
-					</li>
-				))}
-			</ul>
-		</section>
-
-		<!-- Skills -->
-		<section id="skills" class="section">
-			<div class="section-head">
-				<span class="section-num font-mono text-xs text-weak">03</span>
-				<h2 class="section-title font-serif text-2xl sm:text-3xl">Tooling</h2>
-			</div>
-			<dl class="skills-grid grid sm:grid-cols-2 gap-x-10 gap-y-6 mt-4">
-				{skills.map(s => (
-					<div class="skill-group flex flex-col gap-2">
-						<dt class="font-mono text-xs uppercase tracking-[0.18em] text-secondary">{s.group}</dt>
-						<dd class="text-base leading-relaxed">{s.items.join(" · ")}</dd>
-					</div>
-				))}
-			</dl>
-		</section>
-
-			<!-- Visual work -->
-			<section id="visual" class="section">
-				<div class="section-head">
-					<span class="section-num font-mono text-xs text-weak">04</span>
-					<h2 class="section-title font-serif text-2xl sm:text-3xl">Film &amp; visual work</h2>
-				</div>
-				<p class="text-secondary text-base mt-4 max-w-2xl">
-					Video and images are part of how I organize ideas. This section is for visual work
-					without making it look more finished than it is.
-				</p>
-			<ul class="film-list flex flex-col mt-4 list-none">
-				{films.map(f => (
-					<li class="film-row grid sm:grid-cols-[7rem_1fr] gap-2 sm:gap-6 py-5 border-t border-shadow">
-						<div class="font-mono text-xs text-weak pt-1">{f.year}</div>
-						<div class="flex flex-col gap-1">
-							<h3 class="font-serif text-lg leading-snug">{f.title}</h3>
-							<p class="text-secondary text-sm font-mono">{f.role}</p>
-							<p class="text-base leading-relaxed mt-1">{f.note}</p>
-						</div>
-					</li>
-				))}
-			</ul>
-		</section>
-
-		<!-- Current focus -->
-		<section id="now" class="section">
-			<div class="section-head">
-				<span class="section-num font-mono text-xs text-weak">05</span>
-				<h2 class="section-title font-serif text-2xl sm:text-3xl">Currently</h2>
-			</div>
-			<dl class="now-grid grid sm:grid-cols-2 gap-x-10 gap-y-6 mt-4">
-				{focus.map(f => (
-					<div class="now-row flex flex-col gap-1">
-						<dt class="font-mono text-xs uppercase tracking-[0.18em] text-secondary">{f.label}</dt>
-						<dd class="text-base leading-relaxed">{f.body}</dd>
-					</div>
-				))}
-			</dl>
-		</section>
-
-		<!-- Contact CTA -->
-		<section id="contact" class="section contact-cta flex flex-col items-start gap-6 py-10 border-t border-primary">
-				<p class="font-mono text-xs tracking-[0.2em] uppercase text-weak">06 — Contact</p>
-				<h2 class="font-serif text-3xl sm:text-5xl leading-tight max-w-2xl">
-					Contact
-				</h2>
-				<p class="text-secondary text-lg max-w-xl leading-relaxed">
-					Email is the best way to reach me.
-				</p>
-				<div class="contact-links flex flex-wrap gap-x-6 gap-y-2 font-mono text-sm">
-					<a href="mailto:wangsc1124@gmail.com" class="link-arrow">wangsc1124@gmail.com →</a>
-					<a href="https://github.com/Gavin-WangSC" target="_blank" rel="noopener" class="link-arrow">github/Gavin-WangSC →</a>
-				</div>
-		</section>
+						<time datetime={latest.data.timestamp.toISOString()} class="text-secondary font-mono text-xs">
+							{Time.toString(latest.data.timestamp)}
+						</time>
+					</blockquote>
+				</footer>
+			)
+		}
 	</main>
 </Base>
-
-<style>
-	.hero-title {
-		font-family: var(--font-serif), Georgia, serif;
-		letter-spacing: -0.015em;
-	}
-
-	.hero-title em {
-		font-family: var(--font-cursive), var(--font-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-	}
-
-	.eyebrow {
-		font-family: var(--font-mono), monospace;
-	}
-
-	.logo-wrap {
-		color: var(--primary-color);
-		opacity: 0.9;
-	}
-
-	.section-head {
-		display: flex;
-		align-items: baseline;
-		gap: 0.75rem;
-		padding-bottom: 0.75rem;
-		border-bottom: 1px solid var(--primary-color);
-	}
-
-	.section-num {
-		font-variant-numeric: tabular-nums;
-	}
-
-	.section-title {
-		letter-spacing: -0.01em;
-	}
-
-	.link-arrow {
-		color: var(--primary-color);
-		text-decoration: underline transparent 0.05em;
-		text-underline-offset: 0.2em;
-		transition: text-decoration-color 0.15s ease-in-out;
-	}
-
-	.link-arrow:hover,
-	.link-arrow:focus-visible {
-		text-decoration-color: currentColor;
-	}
-
-	.inline-link {
-		text-decoration: underline 0.05em var(--secondary-color);
-		text-underline-offset: 0.2em;
-		transition: text-decoration-color 0.15s ease-in-out;
-	}
-
-	.inline-link:hover {
-		text-decoration-color: currentColor;
-	}
-
-	.meta-card {
-		border: 1px solid var(--shadow-color);
-		border-radius: 2px;
-		padding: 1rem 1.1rem;
-		background: var(--block-color);
-		align-self: start;
-	}
-
-	.meta-row {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		font-variant-numeric: tabular-nums;
-	}
-
-	.border-shadow {
-		border-color: var(--shadow-color);
-	}
-
-	.text-weak {
-		color: var(--weak-color);
-	}
-
-	.project-row,
-	.film-row {
-		transition: background-color 0.15s ease-in-out;
-	}
-
-	.project-row:hover,
-	.film-row:hover {
-		background-color: color-mix(in srgb, var(--block-color) 60%, transparent);
-	}
-
-	.status-pill {
-		padding: 0.15rem 0.5rem;
-		border-radius: 2px;
-		border: 1px solid currentColor;
-		line-height: 1.2;
-	}
-
-	.status-active {
-		color: var(--primary-color);
-	}
-
-	.status-shipped {
-		color: var(--secondary-color);
-	}
-
-	.status-exploring {
-		color: var(--weak-color);
-	}
-
-	.contact-cta {
-		margin-top: 2rem;
-	}
-
-	@media (max-width: 640px) {
-		.section-head {
-			flex-wrap: wrap;
-		}
-		.hero-title {
-			font-size: 2.25rem;
-		}
-	}
-
-	/* Respect reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.project-row,
-		.film-row,
-		.link-arrow,
-		.inline-link {
-			transition: none;
-		}
-	}
-</style>

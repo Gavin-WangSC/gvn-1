@@ -2,7 +2,7 @@ import siteConfig from "./src/lib/config";
 
 const config = siteConfig({
 	title: "Gavin Wang",
-	prologue: "Student.\nProjects and notes on\ntechnology, people, and learning.",
+	prologue: "Projects and notes\non technology, people,\nand learning.",
 	author: {
 		name: "Gavin Wang",
 		email: "wangsc1124@gmail.com",
@@ -29,7 +29,7 @@ const config = siteConfig({
 		section: "*",
 		limit: 20
 	},
-	latest: "*"
+	latest: "note"
 });
 
 // Keep locale-aware content paths because this repo stores information and
